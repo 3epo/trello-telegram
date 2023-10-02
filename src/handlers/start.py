@@ -3,6 +3,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
 from src.firebase import firebase
+import re
 
 from src.filters.is_private import IsPrivateFilter
 import src.keyboards.buttons as kb
@@ -33,9 +34,21 @@ async def start_handler(message: types.Message, state: FSMContext):
 
 @start_router.message(Registration.phone_number)
 async def start_handler(message: types.Message, state: FSMContext):
-    await state.update_data(phone_number=message.text)
+    if message.contact is not None:
+        # Если пользователь поделился контактом
+        phone_number = message.contact.phone_number
+    else:
+        # Если пользователь ввел номер вручную
+        phone_number = message.text
+
+        # Проверка на валидность номера телефона
+        if not re.match(r"(\+998|998)?[0-9]{9}$", phone_number):
+            await message.answer("Пожалуйста, введите действительный номер телефона.")
+            return
+
+    await state.update_data(phone_number=phone_number)
     await state.set_state(Registration.org_name)
-    await message.answer(f"Ваш номер +{message.text}")
+    await message.answer(f"Ваш номер: {phone_number}")
     await message.answer('А теперь напишите название организации!')
 
 @start_router.message(Registration.org_name)

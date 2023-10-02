@@ -28,7 +28,7 @@ async def start_handler(message: types.Message, state: FSMContext):
 
 @settings_router.message(Registration.phone_number)
 async def start_handler(message: types.Message, state: FSMContext):
-    await state.update_data(phone_number=message.text)
+    await state.update_data(phone_number=message.contact.phone_number)
     await state.set_state(Registration.org_name)
     await message.answer(f"Ваш номер +{message.text}")
     await message.answer('А теперь напишите название организации!')
