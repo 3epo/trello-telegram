@@ -22,7 +22,7 @@ async def start_handler(message: types.Message, state: FSMContext):
         await message.answer(f"Здравствуйте! Мы рады снова вас видеть ☺️",reply_markup=kb.mainMenu)#если запись имеется
         await state.clear()
     else:
-        await message.answer(f'Здравствуйте! Вас приветсвует виртуальный менеджер Орлова Андрея. Как мне к вам обращаться?')
+        await message.answer(f'Здравствуйте! Вас приветсвует виртуальный менеджер Орлова Андрея. Как мне к вам обращаться?',reply_markup=kb.removebtn)
         await state.set_state(Registration.name)
 
 @start_router.message(Registration.name)
@@ -48,7 +48,7 @@ async def start_handler(message: types.Message, state: FSMContext):
 
     await state.update_data(phone_number=phone_number)
     await state.set_state(Registration.org_name)
-    await message.answer(f"Ваш номер: {phone_number}")
+    await message.answer(f"Ваш номер: {phone_number}",reply_markup=kb.removebtn)
     await message.answer('А теперь напишите название организации!')
 
 @start_router.message(Registration.org_name)
@@ -57,7 +57,6 @@ async def start_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     await message.answer(f"Записали вашу организацию как: {message.text}!")
     firebase.createUser(message.from_user.id,message.from_user.first_name,message.from_user.last_name,message.from_user.username,data['name'],data['phone_number'],message.text)#создание записи
-    await message.answer(f'Введенные данные:\nИмя:{data["name"]}\nНомер телефона:+{data["phone_number"]}\nОрганизация:{data["org_name"]}')
     await message.answer("✅ Спасибо за регистрацию!",reply_markup=kb.mainMenu)
     await state.clear()
 
