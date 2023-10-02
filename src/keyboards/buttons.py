@@ -6,26 +6,26 @@ from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton,
 removebtn = ReplyKeyboardRemove()
 
 """"Back button"""
-backbtn = KeyboardButton(text="⬅️ Назад")
+backbtn = KeyboardButton(text='⬅️ Назад')
 
 """"Cancel button"""
-cancelbtn = KeyboardButton(text="❌ Отменить")
-cancel = ReplyKeyboardMarkup(keyboard=cancelbtn,resize_keyboard=True)
+cancelbtn = KeyboardButton(text='❌ Отменить')
+cancel = ReplyKeyboardMarkup(keyboard=[[cancelbtn]],resize_keyboard=True)
 
 """ Main Menu """
 create_tiket = KeyboardButton(text="✅ Создать заявку")
-mainMenu = ReplyKeyboardMarkup(keyboard=create_tiket,resize_keyboard=True)
+mainMenu = ReplyKeyboardMarkup(keyboard=[[create_tiket]],resize_keyboard=True)
 
 """ Settings """
 settingsbtn = [
-    [KeyboardButton(text="👤 Сменить имя"),
-     KeyboardButton(text="📱 Сменить номер телефона")]
+    [KeyboardButton(text="👤 Сменить имя")],
+     [KeyboardButton(text="📱 Сменить номер телефона")]
 ]
-settings = ReplyKeyboardMarkup(keyboard=settingsbtn,keyboard=backbtn,resize_keyboard=True,one_time_keyboard=True)
+settings = ReplyKeyboardMarkup(keyboard=settingsbtn,resize_keyboard=True,one_time_keyboard=True)
 
 """ Change phone number """
 send_number = KeyboardButton(text="📲 Отправить свой контакт",request_contact=True)
-btn_send_number = ReplyKeyboardMarkup(keyboard=send_number,resize_keyboard=True)
+btn_send_number = ReplyKeyboardMarkup(keyboard=[[send_number]],resize_keyboard=True)
 
 """Tiket Accept"""
 inline_tiket = InlineKeyboardMarkup(inline_keyboard=

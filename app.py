@@ -8,7 +8,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from src import load_config
 from src.handlers.start import start_router
 from src.middlewares.config import ConfigMiddleware
-from src.middlewares.logo import consol
+from src.logo import consol
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(

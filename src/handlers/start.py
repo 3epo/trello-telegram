@@ -4,6 +4,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
 
 from src.filters.is_private import IsPrivateFilter
+import src.keyboards.buttons as kb
 
 start_router = Router()
 start_router.message.filter(IsPrivateFilter())
@@ -23,7 +24,7 @@ async def start_handler(message: types.Message, state: FSMContext):
     await state.update_data(name=message.text)
     await state.set_state(Registration.phone_number)
     await message.answer(f"Очень приятно! Я буду вас звать {message.text}")
-    await message.answer('Отправьте ваш номер телефона для связи с вами.')
+    await message.answer('Отправьте ваш номер телефона для связи с вами.',reply_markup=kb.btn_send_number)
 
 @start_router.message(Registration.phone_number)
 async def start_handler(message: types.Message, state: FSMContext):
@@ -38,7 +39,7 @@ async def start_handler(message: types.Message, state: FSMContext):
     data = await state.get_data()
     await message.answer(f"Записали вашу организацию как: {message.text}!")
     await message.answer(f'Введенные данные:\nИмя:{data["name"]}\nНомер телефона:+{data["phone_number"]}\nОрганизация:{data["org_name"]}')
-    await message.answer("✅ Спасибо за регистрацию!")
+    await message.answer("✅ Спасибо за регистрацию!",reply_markup=kb.mainMenu)
     await state.clear()
 
 
