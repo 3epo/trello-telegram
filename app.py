@@ -7,6 +7,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 
 from src import load_config
 from src.handlers.start import start_router
+from src.handlers.settings import settings_router
 from src.middlewares.config import ConfigMiddleware
 from src.logo import consol
 
