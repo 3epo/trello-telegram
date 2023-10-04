@@ -42,7 +42,7 @@ async def start_handler(message: types.Message, state: FSMContext):
         phone_number = message.text
 
         # Проверка на валидность номера телефона
-        if not re.match(r"(\+998|998)?[0-9]{9}$", phone_number):
+        if not re.match(r"(\+998|998)[0-9]{9}$", phone_number):
             await message.answer("Пожалуйста, введите действительный номер телефона.")
             return
 

@@ -9,8 +9,8 @@ removebtn = ReplyKeyboardRemove()
 backbtn = KeyboardButton(text='⬅️ Назад')
 
 """"Cancel button"""
-cancelbtn = KeyboardButton(text='❌ Отменить')
-cancel = ReplyKeyboardMarkup(keyboard=[[cancelbtn]], resize_keyboard=True)
+cancelbtn = [KeyboardButton(text='❌ Отменить')]
+cancel = ReplyKeyboardMarkup(keyboard=[cancelbtn], resize_keyboard=True)
 
 """ Main Menu """
 create_tiket = KeyboardButton(text="✅ Создать заявку")
@@ -22,7 +22,7 @@ settingsbtn = [
     KeyboardButton(text="📱 Сменить номер телефона")
 ]
 
-settings = ReplyKeyboardMarkup(keyboard=[settingsbtn, [cancelbtn]], resize_keyboard=True, one_time_keyboard=True)
+settings = ReplyKeyboardMarkup(keyboard=[settingsbtn, cancelbtn], resize_keyboard=True, one_time_keyboard=True)
 
 """ Change phone number """
 send_number = KeyboardButton(text="📲 Отправить свой контакт",request_contact=True)
