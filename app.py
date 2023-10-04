@@ -39,6 +39,7 @@ async def on_startup():
 
     # Регистрация роутеров
     dp.include_router(start_router)
+    dp.include_router(settings_router)
 
 
 @app.post(WEBHOOK_PATH)

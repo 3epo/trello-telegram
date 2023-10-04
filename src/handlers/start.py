@@ -59,12 +59,3 @@ async def start_handler(message: types.Message, state: FSMContext):
     firebase.createUser(message.from_user.id,message.from_user.first_name,message.from_user.last_name,message.from_user.username,data['name'],data['phone_number'],message.text)#создание записи
     await message.answer("✅ Спасибо за регистрацию!",reply_markup=kb.mainMenu)
     await state.clear()
-
-
-
-@start_router.message()
-async def echo_handler(message: types.Message) -> None:
-    try:
-        await message.send_copy(chat_id=message.chat.id)
-    except TypeError:
-        await message.answer("Nice try!")
