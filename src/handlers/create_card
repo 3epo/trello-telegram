@@ -1,0 +1,133 @@
+from multiprocessing.connection import wait
+from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher import FSMContext,Dispatcher
+from aiogram.dispatcher.filters import Text
+from aiogram import types
+from cards import Send_Comment
+from datetime import datetime
+
+import admins
+
+
+#from createdb import MySQL
+from firebase import firebase
+
+from create_bot import dp,bot
+
+import buttons
+
+PHOTOS_ID = []
+
+
+class CellarImport(StatesGroup):#класс с данными для сохранения этапов ФСМ при старте
+   create_tiket = State()#первый этап
+   create_header = State()#второй этап
+   send2trello = State()#третий этап
+
+
+# этап №1
+async def enter_header(message: types.Message, state: FSMContext):
+   await message.answer("Давайте придумаем как мы назовём нашу заявку?\nДайте ей небольшое оглавление:",reply_markup=buttons.cancel)#если запись имеется
+   await CellarImport.create_tiket.set()#ожидание ответа до следующего этапа
+
+# этап №2
+async def enter_tiket(message: types.Message, state: FSMContext):#обработка данных введенных при /start
+   await state.update_data(header = message.text)
+   if message.text == "❌ Отменить":
+      await message.answer(f"Заявка отменена",reply_markup=buttons.mainMenu)
+      await state.finish()
+   elif message.content_type == "text":
+      await message.answer("Отлично! А сейчас вы можете подробно описать вашу заявку:\n\n\
+📌 Вы можете отправить текст, фото, видеосообщение, голосовое сообщение, геолокацию, контакт, видео или файл.",reply_markup=buttons.removebtn)#если запись имеется
+      await CellarImport.create_header.set()#ожидание ответа до следующего этапа
+   else:
+      await message.answer("Заголовок должен быть ОБЯЗАТЕЛЬНО текстом.")#если запись имеется
+
+# этап №3
+async def send_tiket(message: types.Message, state: FSMContext):#обработка данных + ФСМ
+   await state.update_data(tiket = message.text) #message.text это введенные данные
+   if message.content_type == "text":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+
+   elif message.content_type == "photo":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_photo = message.photo[-1].file_id
+      cap = message.caption
+      for chat in admins.adminsID:
+         await bot.send_photo(chat_id=chat, photo=user_photo, caption=cap)
+         message.text = f"Photo: {user_photo},{cap}"
+
+   elif message.content_type == "video_note":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_note = message.video_note.file_id
+      for chat in admins.adminsID:
+         await bot.send_video_note(chat,user_note)
+      message.text = f"VideoNote: {user_note}"
+
+   elif message.content_type == "document":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_file = message.document.file_id
+      cap = message.caption
+      for chat in admins.adminsID:
+         await bot.send_document(chat_id=chat,document=user_file,caption=cap)
+      message.text = f"Doc: {user_file},{cap}"
+
+   elif message.content_type == "video":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_file = message.video.file_id
+      cap = message.caption
+      await bot.send_video(chat_id=chat,video=user_file,caption=cap)
+      message.text = f"Video: {user_file},{cap}"
+
+   elif message.content_type == "voice":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_file = message.voice.file_id
+      for chat in admins.adminsID:
+         await bot.send_voice(chat_id=chat,voice=user_file)
+      message.text = f"Voice: {user_file}"
+
+   elif message.content_type == "contact":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_file = message.contact.phone_number
+      user_phone_name = message.contact.first_name
+      for chat in admins.adminsID:
+         await bot.send_contact(chat_id=chat,phone_number=user_file,first_name=user_phone_name)
+      message.text = f"Phone contact: {user_phone_name}:{user_file}"
+
+   elif message.content_type == "location":
+      await message.answer(f"Готово! В ближайщее время наш специалист займеться вашей заявкой!",reply_markup=buttons.mainMenu)
+      user_pos1 = message.location.latitude
+      user_pos2 = message.location.longitude
+      for chat in admins.adminsID:
+         await bot.send_location(chat_id=chat,latitude=user_pos1, longitude=user_pos2)
+      message.text = f"Location: X:{user_pos1},Y:{user_pos2}"
+
+   else:
+      await message.answer(f"Что то пошло не так :(",reply_markup=buttons.mainMenu)
+
+   phone_number = firebase.getUserPhone(message.from_user.id)
+   phone_link = "[+"+phone_number+"](tel://+"+(phone_number)+")"
+   username = firebase.getUserName(message.from_user.id)
+   org_name = firebase.getOrgName(message.from_user.id)
+
+   data = await state.get_data()
+   header_tiket = data['header']
+   tiket_id = firebase.getTiketId()
+   date = datetime.now().strftime("%d.%m.%Y %H:%M")
+
+   trello_id = Send_Comment.create(header_tiket,message.text,username,message.from_user.username,phone_link,tiket_id)
+   firebase.createTiket(message.from_user.id,username,message.from_user.username,phone_number,header_tiket,trello_id,tiket_id,date)
+
+   mention = "["+username+"](tg://user?id="+str(message.from_user.id)+")"
+
+   for chat in admins.adminsID:
+      await bot.send_message(chat_id=chat,
+         text= f"🚀 *Заявка #{tiket_id}*\n\n{mention} из *{org_name}* создал новую заявку.\n\n*Тема заявки:* {header_tiket}" ,
+         parse_mode="Markdown",reply_markup=buttons.inline_tiket)
+   await state.finish()
+
+def handler_client(db : Dispatcher):
+    dp.register_message_handler(enter_header,Text(startswith="✅ Создать "))
+    dp.register_message_handler(enter_header,Text(startswith="❌ Отменить"))
+    dp.register_message_handler(enter_tiket,content_types=['text', 'sticker', 'video', 'photo', 'audio', 'voice','animation','video_note','document','location','contact'],state=CellarImport.create_tiket)
+    dp.register_message_handler(send_tiket,content_types=['text', 'sticker', 'video', 'photo', 'audio', 'voice','animation','video_note','document','location','contact'],state=CellarImport.create_header)
