@@ -22,6 +22,6 @@ async def settings_handler(message: types.Message):
     await message.answer(f"Пришло время перемен! Что будем менять?",reply_markup=kb.settings)
 
 '''' Кнопка сменить номер телефона '''
-@settings_router.message(F.text == "👤 Сменить имя")
+@settings_router.message(F.text == "❌ Отменить")
 async def settings_handler(message: types.Message):
-    await message.answer(f"иди на хуй!",reply_markup=kb.settings)
+    await message.answer(f"Мы вернулись! Создадим заявку?",reply_markup=kb.mainMenu)
